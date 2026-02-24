@@ -4,12 +4,12 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react';
-import { 
-  LayoutList, 
-  ClipboardList, 
-  BarChart3, 
-  Briefcase, 
-  CircleDollarSign, 
+import {
+  LayoutList,
+  ClipboardList,
+  BarChart3,
+  Briefcase,
+  CircleDollarSign,
   Settings as SettingsIcon,
   Plus,
   Trash2,
@@ -20,14 +20,14 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  PageType, 
-  Project, 
-  Case, 
-  Payment, 
-  Settings, 
-  Analysis, 
-  APIResponse 
+import {
+  PageType,
+  Project,
+  Case,
+  Payment,
+  Settings,
+  Analysis,
+  APIResponse
 } from './types';
 import { apiService } from './services/apiService';
 
@@ -35,7 +35,7 @@ export default function App() {
   const [activePage, setActivePage] = useState<PageType>('entry');
   const [loading, setLoading] = useState(true);
   const [loaderText, setLoaderText] = useState('系統同步中...');
-  
+
   const [projects, setProjects] = useState<any[][]>([]);
   const [cases, setCases] = useState<any[][]>([]);
   const [payments, setPayments] = useState<any[][]>([]);
@@ -78,29 +78,31 @@ export default function App() {
   }, []);
 
   const groupedProjects = useMemo(() => {
-    const grouped: Record<string, { 
-      content: string; 
-      suggest: string; 
-      staff: string; 
-      status: string; 
-      photos: string; 
-      items: { cat: string; amt: number }[]; 
-      total: number; 
+    const grouped: Record<string, {
+      content: string;
+      location: string;
+      suggest: string;
+      staff: string;
+      status: string;
+      photos: string;
+      items: { cat: string; amt: number }[];
+      total: number;
       originalIndex: number;
     }> = {};
 
     projects.forEach((r, i) => {
       const name = r[0];
       if (!grouped[name]) {
-        grouped[name] = { 
-          content: r[1], 
-          suggest: r[3], 
-          staff: r[4], 
-          status: r[7], 
-          photos: r[9], 
-          items: [], 
-          total: 0, 
-          originalIndex: i 
+        grouped[name] = {
+          content: r[1],
+          location: r[2],
+          suggest: r[3],
+          staff: r[4],
+          status: r[7],
+          photos: r[9],
+          items: [],
+          total: 0,
+          originalIndex: i
         };
       }
       grouped[name].items.push({ cat: r[6], amt: Number(r[5] || 0) });
@@ -114,8 +116,9 @@ export default function App() {
     e.preventDefault();
     const form = e.currentTarget;
     const formData = new FormData(form);
-    
+
     const name = formData.get('name') as string;
+    const location = formData.get('location') as string;
     const content = formData.get('content') as string;
     const suggestBy = formData.get('suggestBy') as string;
     const staff = formData.get('staff') as string;
@@ -146,6 +149,7 @@ export default function App() {
 
         await apiService.addProject({
           name,
+          location,
           amount,
           category: cat,
           suggestBy,
@@ -192,6 +196,7 @@ export default function App() {
             <thead>
               <tr>
                 <th>工程名稱</th>
+                <th>地點</th>
                 <th>內容</th>
                 <th>預算分配/合計</th>
                 <th>建議/承辦</th>
@@ -204,6 +209,7 @@ export default function App() {
               {Object.entries(groupedProjects).map(([name, g]: [string, any]) => (
                 <tr key={name}>
                   <td className="font-bold">{name}</td>
+                  <td className="text-xs text-slate-500">{g.location || '-'}</td>
                   <td className="max-w-xs text-xs text-slate-500">{g.content || '-'}</td>
                   <td>
                     <div className="flex flex-wrap gap-1 mb-1">
@@ -233,13 +239,13 @@ export default function App() {
                   </td>
                   <td>
                     <div className="flex gap-1">
-                      <button 
+                      <button
                         onClick={() => setProjEditModal({ open: true, project: projects[g.originalIndex], index: g.originalIndex })}
                         className="btn btn-warn p-1.5"
                       >
                         <Edit className="w-4 h-4" />
                       </button>
-                      <button 
+                      <button
                         onClick={async () => {
                           if (confirm(`確定刪除「${name}」？`)) {
                             setLoading(true);
@@ -288,9 +294,9 @@ export default function App() {
                     <div className="flex items-center gap-2">
                       <span className="text-xs font-medium w-10">{rate}%</span>
                       <div className="prog-bg flex-1">
-                        <div 
-                          className="prog-fill" 
-                          style={{ 
+                        <div
+                          className="prog-fill"
+                          style={{
                             width: `${Math.min(numRate, 100)}%`,
                             backgroundColor: numRate > 100 ? '#ef4444' : '#10b981'
                           }}
@@ -397,19 +403,19 @@ export default function App() {
                       </td>
                       <td>
                         <div className="flex gap-1">
-                          <button 
+                          <button
                             onClick={() => setFullEditModal({ open: true, case: c })}
                             className="btn btn-main p-1.5" title="詳情"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={() => setAssignModal({ open: true, caseName: c[0] })}
                             className="btn btn-sec p-1.5" title="連結項目"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
-                          <button 
+                          <button
                             onClick={async () => {
                               if (confirm(`標案「${c[0]}」將刪除，相關項目將回歸未分派。確定？`)) {
                                 setLoading(true);
@@ -474,7 +480,7 @@ export default function App() {
                       </div>
                     </td>
                     <td>
-                      <button 
+                      <button
                         onClick={() => setPayModal({ open: true, caseName: c[0] })}
                         className="btn btn-warn"
                       >
@@ -500,7 +506,7 @@ export default function App() {
       {/* Loader */}
       <AnimatePresence>
         {loading && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -526,11 +532,10 @@ export default function App() {
             <button
               key={tab.id}
               onClick={() => setActivePage(tab.id as PageType)}
-              className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${
-                activePage === tab.id 
-                  ? 'text-white bg-slate-700 border-b-4 border-main' 
+              className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activePage === tab.id
+                  ? 'text-white bg-slate-700 border-b-4 border-main'
                   : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
-              }`}
+                }`}
             >
               <tab.icon className="w-5 h-5" />
               {tab.label}
@@ -590,7 +595,7 @@ export default function App() {
               </table>
             </div>
             <div className="flex gap-3 mt-6">
-              <button 
+              <button
                 className="btn btn-main flex-1 justify-center py-3"
                 onClick={async () => {
                   const chks = document.querySelectorAll('.assign-chk:checked') as NodeListOf<HTMLInputElement>;
@@ -624,6 +629,7 @@ export default function App() {
                 oldName: projEditModal.project[0],
                 oldCat: projEditModal.project[6],
                 name: formData.get('name'),
+                location: formData.get('location'),
                 content: formData.get('content'),
                 amount: formData.get('amount'),
                 category: formData.get('category'),
@@ -638,6 +644,10 @@ export default function App() {
               <div>
                 <label className="block text-sm font-medium mb-1">工程名稱</label>
                 <input type="text" name="name" defaultValue={projEditModal.project[0]} className="w-full p-2 border rounded-md" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium mb-1">工程地點</label>
+                <input type="text" name="location" defaultValue={projEditModal.project[2]} className="w-full p-2 border rounded-md" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -790,7 +800,7 @@ export default function App() {
                       <td className="font-bold text-sec">${Number(h[2]).toLocaleString()}</td>
                       <td className="text-xs">{h[4] || '-'}</td>
                       <td>
-                        <button 
+                        <button
                           onClick={async () => {
                             if (confirm('確定刪除此請款紀錄？')) {
                               setLoading(true);
@@ -850,7 +860,11 @@ function EntryPage({ settings, handleSaveProject }: { settings: Settings; handle
             <label className="block text-sm font-medium mb-1">工程名稱*</label>
             <input type="text" name="name" required className="w-full p-2 border rounded-md" />
           </div>
-          
+          <div>
+            <label className="block text-sm font-medium mb-1">工程地點</label>
+            <input type="text" name="location" className="w-full p-2 border rounded-md" />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium mb-1">建議者</label>
@@ -878,10 +892,10 @@ function EntryPage({ settings, handleSaveProject }: { settings: Settings; handle
             <div className="grid grid-cols-3 gap-2 bg-slate-50 p-4 rounded-lg border border-slate-200">
               {Object.keys(settings.categories).map(c => (
                 <label key={c} className="flex items-center gap-2 cursor-pointer hover:text-main transition-colors">
-                  <input 
-                    type="checkbox" 
-                    name="budgetCats" 
-                    value={c} 
+                  <input
+                    type="checkbox"
+                    name="budgetCats"
+                    value={c}
                     onChange={(e) => handleCatChange(c, e.target.checked)}
                     className="w-4 h-4"
                   /> {c}
@@ -891,7 +905,7 @@ function EntryPage({ settings, handleSaveProject }: { settings: Settings; handle
           </div>
 
           {selectedCats.length > 0 && (
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               className="bg-emerald-50 p-4 rounded-lg border border-emerald-200"
@@ -901,12 +915,12 @@ function EntryPage({ settings, handleSaveProject }: { settings: Settings; handle
                 {selectedCats.map(cat => (
                   <div key={cat} className="flex items-center gap-3">
                     <span className="flex-1 text-sm">{cat}</span>
-                    <input 
-                      type="number" 
+                    <input
+                      type="number"
                       data-cat={cat}
                       onChange={calculateTotal}
-                      className="split-amt w-32 p-1.5 border rounded-md" 
-                      placeholder="金額" 
+                      className="split-amt w-32 p-1.5 border rounded-md"
+                      placeholder="金額"
                     />
                   </div>
                 ))}
@@ -938,15 +952,15 @@ function EntryPage({ settings, handleSaveProject }: { settings: Settings; handle
   );
 }
 
-function SettingsPage({ 
-  settings, 
-  setSettings, 
-  fetchData, 
-  setLoading, 
-  setLoaderText 
-}: { 
-  settings: Settings; 
-  setSettings: React.Dispatch<React.SetStateAction<Settings>>; 
+function SettingsPage({
+  settings,
+  setSettings,
+  fetchData,
+  setLoading,
+  setLoaderText
+}: {
+  settings: Settings;
+  setSettings: React.Dispatch<React.SetStateAction<Settings>>;
   fetchData: () => void;
   setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setLoaderText: React.Dispatch<React.SetStateAction<string>>;
@@ -988,21 +1002,21 @@ function SettingsPage({
         <div className="card">
           <h3 className="text-lg font-bold mb-4">📂 預算科目管理</h3>
           <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              placeholder="科目名稱" 
-              value={newCat.name} 
+            <input
+              type="text"
+              placeholder="科目名稱"
+              value={newCat.name}
               onChange={e => setNewCat({ ...newCat, name: e.target.value })}
-              className="flex-1 p-2 border rounded-md" 
+              className="flex-1 p-2 border rounded-md"
             />
-            <input 
-              type="number" 
-              placeholder="預算" 
-              value={newCat.budget} 
+            <input
+              type="number"
+              placeholder="預算"
+              value={newCat.budget}
               onChange={e => setNewCat({ ...newCat, budget: e.target.value })}
-              className="w-32 p-2 border rounded-md" 
+              className="w-32 p-2 border rounded-md"
             />
-            <button 
+            <button
               onClick={() => {
                 if (!newCat.name) return;
                 setSettings({ ...settings, categories: { ...settings.categories, [newCat.name]: Number(newCat.budget) } });
@@ -1028,21 +1042,21 @@ function SettingsPage({
         <div className="card">
           <h3 className="text-lg font-bold mb-4">👤 建議者額度管理</h3>
           <div className="flex gap-2 mb-4">
-            <input 
-              type="text" 
-              placeholder="建議者姓名" 
-              value={newSug.name} 
+            <input
+              type="text"
+              placeholder="建議者姓名"
+              value={newSug.name}
               onChange={e => setNewSug({ ...newSug, name: e.target.value })}
-              className="flex-1 p-2 border rounded-md" 
+              className="flex-1 p-2 border rounded-md"
             />
-            <input 
-              type="number" 
-              placeholder="額度" 
-              value={newSug.budget} 
+            <input
+              type="number"
+              placeholder="額度"
+              value={newSug.budget}
               onChange={e => setNewSug({ ...newSug, budget: e.target.value })}
-              className="w-32 p-2 border rounded-md" 
+              className="w-32 p-2 border rounded-md"
             />
-            <button 
+            <button
               onClick={() => {
                 if (!newSug.name) return;
                 setSettings({ ...settings, suggesters: { ...settings.suggesters, [newSug.name]: Number(newSug.budget) } });
@@ -1069,14 +1083,14 @@ function SettingsPage({
       <div className="card max-w-xl">
         <h3 className="text-lg font-bold mb-4">👷 承辦人員名單</h3>
         <div className="flex gap-2 mb-4">
-          <input 
-            type="text" 
-            placeholder="人員姓名" 
-            value={newStaff} 
+          <input
+            type="text"
+            placeholder="人員姓名"
+            value={newStaff}
             onChange={e => setNewStaff(e.target.value)}
-            className="flex-1 p-2 border rounded-md" 
+            className="flex-1 p-2 border rounded-md"
           />
-          <button 
+          <button
             onClick={() => {
               if (!newStaff) return;
               setSettings({ ...settings, staff: [...settings.staff, newStaff] });
@@ -1098,7 +1112,7 @@ function SettingsPage({
         </table>
       </div>
 
-      <button 
+      <button
         onClick={async () => {
           setLoading(true);
           setLoaderText('儲存設定中...');
@@ -1115,14 +1129,14 @@ function SettingsPage({
 
 function Modal({ title, children, onClose }: { title: string; children: React.ReactNode; onClose: () => void }) {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       className="fixed inset-0 bg-black/60 z-[1000] flex items-center justify-center p-4 backdrop-blur-sm"
       onClick={onClose}
     >
-      <motion.div 
+      <motion.div
         initial={{ scale: 0.9, opacity: 0, y: 20 }}
         animate={{ scale: 1, opacity: 1, y: 0 }}
         exit={{ scale: 0.9, opacity: 0, y: 20 }}

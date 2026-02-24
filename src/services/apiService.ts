@@ -18,6 +18,7 @@ export const apiService = {
 
   async addProject(data: {
     name: string;
+    location: string;
     amount: string;
     category: string;
     suggestBy: string;
