@@ -1,0 +1,48 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Microsoft JhengHei", ui-sans-serif, system-ui, sans-serif;
+  
+  --color-main: #2563eb;
+  --color-sec: #10b981;
+  --color-warn: #f59e0b;
+  --color-danger: #ef4444;
+  --color-bg-slate: #f8fafc;
+}
+
+body {
+  @apply bg-bg-slate text-slate-700 font-sans text-sm;
+}
+
+.tab-active {
+  @apply text-white bg-slate-700 border-b-4 border-main;
+}
+
+.btn {
+  @apply px-3 py-2 rounded-md font-bold transition-all duration-200 inline-flex items-center gap-1 cursor-pointer disabled:opacity-50;
+}
+
+.btn-main { @apply bg-main text-white hover:bg-blue-700; }
+.btn-sec { @apply bg-sec text-white hover:bg-emerald-600; }
+.btn-warn { @apply bg-warn text-white hover:bg-amber-600; }
+.btn-del { @apply bg-red-100 text-danger hover:bg-red-200; }
+
+.prog-bg { @apply bg-slate-200 h-2.5 rounded-full overflow-hidden mt-1; }
+.prog-fill { @apply bg-sec h-full transition-all duration-500; }
+
+.card { @apply bg-white p-5 rounded-xl shadow-sm mb-5; }
+
+table { @apply w-full border-collapse mt-2; }
+th { @apply border border-slate-200 p-3 text-left bg-slate-50 text-slate-600 font-semibold; }
+td { @apply border border-slate-200 p-3 text-left; }
+
+.tag { @apply bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded text-[11px] font-bold inline-block; }
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.animate-spin-custom {
+  animation: spin 1s linear infinite;
+}
