@@ -488,9 +488,10 @@ export default function App() {
               <tr>
                 <th>標案名稱</th>
                 <th>決標金額</th>
-                <th>操作功能</th>
+                <th>請款紀錄</th>
                 <th>累計請款 / 剩餘</th>
                 <th>撥款進度</th>
+                <th>操作功能</th>
               </tr>
             </thead>
             <tbody>
@@ -504,12 +505,15 @@ export default function App() {
                     <td className="font-bold">{c[0]}</td>
                     <td>${total.toLocaleString()}</td>
                     <td>
-                      <button
-                        onClick={() => setPayModal({ open: true, caseName: c[0] })}
-                        className="btn btn-warn"
-                      >
-                        請款紀錄
-                      </button>
+                      <div className="space-y-1">
+                        {payments.filter(p => p[0] === c[0]).map((p, i) => (
+                          <div key={i} className="text-xs flex justify-between gap-4 border-b border-slate-100 last:border-0 py-0.5">
+                            <span className="text-slate-500">{p[1]} ({p[3] ? p[3].split('T')[0] : ''})</span>
+                            <span className="font-medium text-sec">${Number(p[2]).toLocaleString()}</span>
+                          </div>
+                        ))}
+                        {payments.filter(p => p[0] === c[0]).length === 0 && <span className="text-slate-400 italic text-[11px]">尚無紀錄</span>}
+                      </div>
                     </td>
                     <td>
                       <div className="text-sec font-bold">已領: ${paid.toLocaleString()}</div>
@@ -522,6 +526,14 @@ export default function App() {
                           <div className="prog-fill" style={{ width: `${Math.min(numRate, 100)}%` }}></div>
                         </div>
                       </div>
+                    </td>
+                    <td>
+                      <button
+                        onClick={() => setPayModal({ open: true, caseName: c[0] })}
+                        className="btn btn-warn whitespace-nowrap"
+                      >
+                        管理紀錄
+                      </button>
                     </td>
                   </tr>
                 );
