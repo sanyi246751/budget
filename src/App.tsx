@@ -55,6 +55,8 @@ export default function App() {
   const [fullEditModal, setFullEditModal] = useState<{ open: boolean; case: any }>({ open: false, case: null });
   const [payModal, setPayModal] = useState<{ open: boolean; caseName: string }>({ open: false, caseName: '' });
 
+  const [entryKey, setEntryKey] = useState(0);
+
   const fetchData = async (text = '雲端資料同步中...') => {
     setLoading(true);
     setLoaderText(text);
@@ -164,6 +166,7 @@ export default function App() {
 
       alert('儲存成功');
       form.reset();
+      setEntryKey(prev => prev + 1);
       fetchData();
     } catch (error) {
       console.error(error);
@@ -396,9 +399,43 @@ export default function App() {
                       <td>
                         <div className="space-y-1">
                           {linkedProjects.map((lp, i) => (
-                            <div key={i} className="text-[11px] text-slate-500">• {lp[0]} ({lp[6]})</div>
+                            <div key={i} className="flex items-center justify-between group py-1 border-b border-slate-100 last:border-0">
+                              <span className="text-[12px] text-slate-600 font-medium">• {lp[0]} ({lp[6]}) - ${Number(lp[5] || 0).toLocaleString()}</span>
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button
+                                  onClick={() => setProjEditModal({ open: true, project: lp, index: projects.indexOf(lp) })}
+                                  className="text-amber-500 hover:text-amber-600 p-0.5" title="編輯項目"
+                                >
+                                  <Edit className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (confirm(`確定要將「${lp[0]}」從本標案中解除連結嗎？\n(項目將退回「未分派」狀態)`)) {
+                                      setLoading(true);
+                                      await apiService.assignProject(lp[0], '未分派');
+                                      fetchData();
+                                    }
+                                  }}
+                                  className="text-slate-400 hover:text-slate-600 p-0.5" title="解除連結"
+                                >
+                                  <X className="w-3.5 h-3.5" />
+                                </button>
+                                <button
+                                  onClick={async () => {
+                                    if (confirm(`確定要完全刪除工程項目「${lp[0]}」嗎？此操作無法復原！`)) {
+                                      setLoading(true);
+                                      await apiService.deleteProject(lp[0]);
+                                      fetchData();
+                                    }
+                                  }}
+                                  className="text-red-400 hover:text-red-600 p-0.5" title="完全刪除項目"
+                                >
+                                  <Trash2 className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
                           ))}
-                          {linkedProjects.length === 0 && <span className="text-slate-300 italic text-xs">尚未連結項目</span>}
+                          {linkedProjects.length === 0 && <span className="text-slate-400 italic text-[12px]">尚未連結項目</span>}
                         </div>
                       </td>
                       <td>
@@ -533,8 +570,8 @@ export default function App() {
               key={tab.id}
               onClick={() => setActivePage(tab.id as PageType)}
               className={`flex items-center gap-2 px-6 py-4 font-bold transition-all whitespace-nowrap ${activePage === tab.id
-                  ? 'text-white bg-slate-700 border-b-4 border-main'
-                  : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
+                ? 'text-white bg-slate-700 border-b-4 border-main'
+                : 'text-slate-400 hover:text-white hover:bg-slate-700/50'
                 }`}
             >
               <tab.icon className="w-5 h-5" />
@@ -554,7 +591,7 @@ export default function App() {
             exit={{ opacity: 0, x: -10 }}
             transition={{ duration: 0.2 }}
           >
-            {activePage === 'entry' && <EntryPage settings={settings} handleSaveProject={handleSaveProject} />}
+            {activePage === 'entry' && <EntryPage key={entryKey} settings={settings} handleSaveProject={handleSaveProject} />}
             {activePage === 'summary' && renderSummaryPage()}
             {activePage === 'budget' && renderBudgetPage()}
             {activePage === 'case' && renderCasePage()}
