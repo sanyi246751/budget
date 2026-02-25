@@ -359,10 +359,9 @@ export default function App() {
           <h3 className="text-lg font-bold mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5" /> 快速建立標案
           </h3>
-          <form onSubmit={handleCreateCase} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          <form onSubmit={handleCreateCase} className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <input type="text" name="name" placeholder="輸入新標案名稱" className="p-2 border rounded-md" />
             <input type="number" name="budget" placeholder="預算金額" className="p-2 border rounded-md" />
-            <input type="text" name="vendor" placeholder="得標廠商(選填)" className="p-2 border rounded-md" />
             <button type="submit" className="btn btn-main justify-center">建立標案</button>
           </form>
         </div>
@@ -489,9 +488,9 @@ export default function App() {
               <tr>
                 <th>標案名稱</th>
                 <th>決標金額</th>
+                <th>操作功能</th>
                 <th>累計請款 / 剩餘</th>
                 <th>撥款進度</th>
-                <th>功能</th>
               </tr>
             </thead>
             <tbody>
@@ -505,6 +504,14 @@ export default function App() {
                     <td className="font-bold">{c[0]}</td>
                     <td>${total.toLocaleString()}</td>
                     <td>
+                      <button
+                        onClick={() => setPayModal({ open: true, caseName: c[0] })}
+                        className="btn btn-warn"
+                      >
+                        請款紀錄
+                      </button>
+                    </td>
+                    <td>
                       <div className="text-sec font-bold">已領: ${paid.toLocaleString()}</div>
                       <div className="text-danger text-xs">剩餘: ${(total - paid).toLocaleString()}</div>
                     </td>
@@ -515,14 +522,6 @@ export default function App() {
                           <div className="prog-fill" style={{ width: `${Math.min(numRate, 100)}%` }}></div>
                         </div>
                       </div>
-                    </td>
-                    <td>
-                      <button
-                        onClick={() => setPayModal({ open: true, caseName: c[0] })}
-                        className="btn btn-warn"
-                      >
-                        請款紀錄
-                      </button>
                     </td>
                   </tr>
                 );
@@ -751,14 +750,26 @@ export default function App() {
               fetchData();
             }} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
-                <input type="text" name="name" defaultValue={fullEditModal.case[0]} placeholder="標案名稱" className="p-2 border rounded-md" />
-                <select name="status" defaultValue={fullEditModal.case[3]} className="p-2 border rounded-md">
-                  <option value="招標中">招標中</option>
-                  <option value="執行中">執行中</option>
-                  <option value="已結案">已結案</option>
-                </select>
-                <input type="number" name="budget" defaultValue={fullEditModal.case[1]} placeholder="預算金額" className="p-2 border rounded-md" />
-                <input type="text" name="vendor" defaultValue={fullEditModal.case[4]} placeholder="承包廠商" className="p-2 border rounded-md" />
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">標案名稱</label>
+                  <input type="text" name="name" defaultValue={fullEditModal.case[0]} placeholder="標案名稱" className="w-full p-2 border rounded-md" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">狀態</label>
+                  <select name="status" defaultValue={fullEditModal.case[3]} className="w-full p-2 border rounded-md">
+                    <option value="招標中">招標中</option>
+                    <option value="執行中">執行中</option>
+                    <option value="已結案">已結案</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">預算金額</label>
+                  <input type="number" name="budget" defaultValue={fullEditModal.case[1]} placeholder="預算金額" className="w-full p-2 border rounded-md" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-600 mb-1">承包廠商</label>
+                  <input type="text" name="vendor" defaultValue={fullEditModal.case[4]} placeholder="承包廠商" className="w-full p-2 border rounded-md" />
+                </div>
               </div>
               <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
                 <b className="block mb-3">💰 決標明細</b>
@@ -809,10 +820,22 @@ export default function App() {
                 fetchData('更新請款紀錄中...');
               }} className="space-y-3">
                 <div className="grid grid-cols-2 gap-3">
-                  <input type="text" name="stage" placeholder="期別" required className="p-2 border rounded-md" />
-                  <input type="number" name="amount" placeholder="金額" required className="p-2 border rounded-md" />
-                  <input type="date" name="date" required className="p-2 border rounded-md" />
-                  <input type="text" name="invoice" placeholder="發票/備註" className="p-2 border rounded-md" />
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">期別</label>
+                    <input type="text" name="stage" placeholder="例如：第一期" required className="w-full p-2 border rounded-md" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">請款金額</label>
+                    <input type="number" name="amount" placeholder="金額" required className="w-full p-2 border rounded-md" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">請款日期</label>
+                    <input type="date" name="date" required className="w-full p-2 border rounded-md" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-slate-500 mb-1">發票/備註</label>
+                    <input type="text" name="invoice" placeholder="發票號或說明" className="w-full p-2 border rounded-md" />
+                  </div>
                 </div>
                 <button type="submit" className="btn btn-warn w-full justify-center py-2.5">新增請款紀錄</button>
               </form>
@@ -866,7 +889,7 @@ export default function App() {
   );
 }
 
-function EntryPage({ settings, handleSaveProject }: { settings: Settings; handleSaveProject: (e: React.FormEvent<HTMLFormElement>) => void }) {
+function EntryPage({ settings, handleSaveProject, key }: { key?: number | string; settings: Settings; handleSaveProject: (e: React.FormEvent<HTMLFormElement>) => void }) {
   const [selectedCats, setSelectedCats] = useState<string[]>([]);
   const [totalAmount, setTotalAmount] = useState(0);
 
